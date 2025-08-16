@@ -2,27 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Clasifica & Gana: Reciclaje</title>
+  <meta name="description" content="Juego educativo de clasificación de residuos: orgánico, reciclable y no aprovechable." />
   <style>
     :root{
-      --bg:#0f172a;          /* fondo */
-      --card:#111827;        /* tarjetas */
-      --muted:#94a3b8;       /* texto secundario */
+      --bg:#ffffff;          /* fondo blanco solicitado */
+      --text:#111827;        /* texto principal gris oscuro */
+      --muted:#6b7280;       /* texto secundario */
+      --card:#f8fafc;        /* tarjetas claras */
+      --border:#e5e7eb;      /* borde suave */
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
       --ok:#16a34a;          /* correcto */
       --bad:#ef4444;         /* incorrecto */
-      --accent:#22c55e;      /* acentos */
-      --accent2:#38bdf8;     /* acentos 2 */
-      --shadow:0 10px 30px rgba(0,0,0,.25);
-      --radius:18px;
+      --accent:#2563eb;      /* acento */
+      --accent2:#22c55e;     /* acento secundario */
+      --bin-org:#22c55e;
+      --bin-rec:#38bdf8;
+      --bin-noap:#f59e0b;
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-    body{background:linear-gradient(180deg,#0b1223,#0f172a 35%,#0f172a);color:#e5e7eb;display:flex;align-items:center;justify-content:center;padding:16px}
+    body{background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:16px}
     .game{
       width:min(1000px,100%);
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
+      background:#fff;
+      border:1px solid var(--border);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
@@ -33,94 +39,70 @@
       gap:12px;
       align-items:center;
       padding:16px 18px;
-      background:rgba(255,255,255,.04);
-      border-bottom:1px solid rgba(255,255,255,.08);
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:5;
     }
-    .title{font-weight:700;letter-spacing:.3px}
-    .stat{background:rgba(255,255,255,.05);padding:8px 12px;border-radius:999px;font-size:14px}
+    .title{font-weight:800;letter-spacing:.2px}
+    .stat{background:#f3f4f6;border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:14px}
     .wrap{padding:18px}
-    .arena{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:18px;
-    }
+    .arena{display:grid;grid-template-columns:1fr;gap:18px}
     .itemCard{
       background:var(--card);
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid var(--border);
       border-radius:var(--radius);
       padding:18px;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      min-height:180px;
+      min-height:200px;
       position:relative;
       text-align:center;
       box-shadow:var(--shadow);
-      transition:transform .2s ease;
+      transition:transform .2s ease, background-color .2s ease;
       user-select:none;
     }
-    .itemCard.dragging{opacity:.85;transform:scale(1.02)}
-    .itemEmoji{font-size:64px;line-height:1.1;margin-bottom:8px}
-    .itemName{font-size:22px;font-weight:700;margin-bottom:6px}
+    .itemCard.dragging{opacity:.95;transform:scale(1.015)}
+    .itemEmoji{font-size:68px;line-height:1.1;margin-bottom:8px}
+    .itemName{font-size:24px;font-weight:800;margin-bottom:6px}
     .hint{font-size:14px;color:var(--muted)}
-    .bins{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
-    }
+    .bins{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .bin{
-      background:rgba(255,255,255,.03);
-      border:1px dashed rgba(255,255,255,.18);
+      background:#fff;
+      border:2px dashed var(--border);
       border-radius:16px;
       padding:16px;
       text-align:center;
       transition:transform .12s ease,border-color .12s ease,background .12s ease;
-      min-height:120px;
+      min-height:130px;
       position:relative;
     }
-    .binLabel{font-weight:700;margin-top:6px}
+    .binLabel{font-weight:800;margin-top:6px}
     .binEmoji{font-size:36px}
-    .bin[data-cat="Orgánico"]{--binColor:#22c55e}
-    .bin[data-cat="Reciclable"]{--binColor:#38bdf8}
-    .bin[data-cat="No aprovechable"]{--binColor:#f59e0b}
-    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:rgba(255,255,255,.06)}
+    .bin[data-cat="Orgánico"]{--binColor:var(--bin-org)}
+    .bin[data-cat="Reciclable"]{--binColor:var(--bin-rec)}
+    .bin[data-cat="No aprovechable"]{--binColor:var(--bin-noap)}
+    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:#f8fafc}
     .feedback{
       position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      pointer-events:none;font-size:28px;font-weight:800;letter-spacing:.3px;
+      pointer-events:none;font-size:28px;font-weight:900;letter-spacing:.2px;
       opacity:0;transform:translateY(10px);transition:opacity .22s ease,transform .22s ease;
     }
     .feedback.show{opacity:1;transform:translateY(0)}
     .feedback.ok{color:var(--ok)}
     .feedback.bad{color:var(--bad)}
-    .footer{
-      margin-top:12px;color:var(--muted);font-size:13px;text-align:center
-    }
-    .btn{
-      background:linear-gradient(180deg,var(--accent2),#2563eb);
-      border:none;color:white;font-weight:700;padding:10px 14px;border-radius:12px;
-      cursor:pointer;box-shadow:var(--shadow);
-    }
-    .btn.secondary{
-      background:linear-gradient(180deg,#16a34a,#15803d);
-    }
-    /* Modal fin de juego */
-    .modal{
-      position:fixed;inset:0;background:rgba(0,0,0,.6);
-      display:none;align-items:center;justify-content:center;padding:16px;
-    }
+    .footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+    .btn{background:linear-gradient(180deg,var(--accent),#1e40af);border:none;color:white;
+         font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
+    .btn.secondary{background:linear-gradient(180deg,var(--accent2),#15803d)}
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
     .modal.show{display:flex}
-    .modalCard{
-      width:min(560px,100%);background:#0b1223;border:1px solid rgba(255,255,255,.1);
-      border-radius:18px;box-shadow:var(--shadow);padding:20px;text-align:center
-    }
+    .modalCard{width:min(560px,100%);background:#fff;border:1px solid var(--border);
+               border-radius:18px;box-shadow:var(--shadow);padding:20px;text-align:center;color:var(--text)}
     .stars{font-size:28px;margin:8px 0 2px}
-    .explain{
-      margin-top:10px;text-align:left;background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;max-height:200px;overflow:auto
-    }
+    .explain{margin-top:10px;text-align:left;background:#f8fafc;border:1px solid var(--border);
+             border-radius:14px;padding:12px;max-height:220px;overflow:auto}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
-    .tag{
-      font-size:12px;background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.1);padding:4px 8px;border-radius:999px;color:#cbd5e1
-    }
+    .tag{font-size:12px;background:#eef2ff;border:1px solid #dbeafe;padding:4px 8px;border-radius:999px;color:#1e3a8a}
     @media (max-width:720px){
       .itemEmoji{font-size:56px}
       .itemName{font-size:20px}
@@ -143,7 +125,7 @@
           <div class="itemEmoji" id="itemEmoji">🍌</div>
           <div class="itemName" id="itemName">Cáscara de plátano</div>
           <div class="hint">Arrastra al contenedor correcto o toca un contenedor para clasificar.</div>
-          <div class="feedback" id="feedback"></div>
+          <div class="feedback" id="feedback" aria-live="polite"></div>
         </div>
         <div class="bins" aria-label="Contenedores de reciclaje">
           <div class="bin" data-cat="Orgánico" tabindex="0" aria-label="Contenedor Orgánico">
@@ -160,7 +142,7 @@
           </div>
         </div>
         <div class="footer">
-          Consejo: puedes <b>hacer clic en el contenedor</b> si no quieres arrastrar. Cambia/añade objetos en el arreglo <code>ITEMS</code> para personalizar contenidos. 
+          Consejo: puedes <b>hacer clic</b> en el contenedor si no quieres arrastrar. Cambia o añade objetos en el arreglo <code>ITEMS</code> para personalizar. 
           <button class="btn secondary" id="btnSkip" title="Saltar ítem (pierdes 1 vida)">Saltar</button>
         </div>
       </div>
@@ -183,7 +165,188 @@
     </div>
   </div>
   <script>
-    // Juego en JavaScript (abreviado aquí por espacio)...
+    // =========================
+    //   CONFIGURACIÓN DEL JUEGO
+    // =========================
+    const GAME_TIME = 60;      // segundos por ronda
+    const START_LIVES = 3;
+    const POINTS_OK = 100;
+    const POINTS_BAD = -50;
+    const LEVEL_SIZE = 10;     // ítems aproximados por nivel
+
+    // Ítems del juego (editables)
+    const ITEMS = [
+      {name:"Cáscara de plátano", emoji:"🍌", cat:"Orgánico", tip:"Restos de frutas y verduras son compostables."},
+      {name:"Hojas secas", emoji:"🍂", cat:"Orgánico", tip:"Material ideal para compost."},
+      {name:"Café molido usado", emoji:"☕️", cat:"Orgánico", tip:"Aporta nitrógeno al compost."},
+      {name:"Botella plástica (PET)", emoji:"🥤", cat:"Reciclable", tip:"Enjuaga y aplasta para reciclar."},
+      {name:"Lata de aluminio", emoji:"🥫", cat:"Reciclable", tip:"El aluminio es altamente reciclable."},
+      {name:"Papel/Cartón limpio", emoji:"📄", cat:"Reciclable", tip:"Evita mezclarlo con comida o grasa."},
+      {name:"Botella de vidrio", emoji:"🍾", cat:"Reciclable", tip:"El vidrio se recicla infinitas veces."},
+      {name:"Servilleta sucia", emoji:"🧻", cat:"No aprovechable", tip:"Contaminada: va a no aprovechable."},
+      {name:"Paquete de snacks", emoji:"🍟", cat:"No aprovechable", tip:"Multicapa difícil de reciclar."},
+      {name:"Colilla de cigarrillo", emoji:"🚬", cat:"No aprovechable", tip:"Desecho contaminante, nunca al piso."},
+      {name:"Pañal desechable", emoji:"🍼", cat:"No aprovechable", tip:"Residuos sanitarios → no aprovechable."},
+      {name:"Cáscara de huevo", emoji:"🥚", cat:"Orgánico", tip:"Se puede compostar (mejor triturada)."},
+      {name:"Revista", emoji:"📚", cat:"Reciclable", tip:"Si está seca y limpia, se recicla."},
+      {name:"Caja de cartón", emoji:"📦", cat:"Reciclable", tip:"Dobla y mantén seca para reciclar."},
+      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."}
+    ];
+
+    // =========================
+    //   ESTADO
+    // =========================
+    let pool = [];         // bolsa de ítems para el nivel
+    let current = null;    // ítem actual
+    let score = 0;
+    let lives = START_LIVES;
+    let level = 1;
+    let timeLeft = GAME_TIME;
+    let timer = null;
+    let stats = {ok:0,bad:0,explanations:[]};
+
+    // =========================
+    //   UTILIDADES
+    // =========================
+    const $ = sel => document.querySelector(sel);
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+    function pickPool(){
+      const copy = shuffle([...ITEMS]);
+      const size = Math.min(LEVEL_SIZE + (level-1)*4, ITEMS.length);
+      return copy.slice(0,size);
+    }
+    function updateHUD(){
+      $("#score").textContent = `Puntos: ${score}`;
+      $("#lives").textContent = `Vidas: ${lives}`;
+      $("#level").textContent = `Nivel: ${level}`;
+      $("#time").textContent = `Tiempo: ${timeLeft}s`;
+    }
+    function nextItem(){
+      if(pool.length===0){ // Siguiente nivel aumenta dificultad al usar más ítems
+        level++;
+        pool = pickPool();
+      }
+      current = pool.pop();
+      $("#itemEmoji").textContent = current.emoji;
+      $("#itemName").textContent = current.name;
+    }
+    function feedback(ok, extra){
+      const el = $("#feedback");
+      el.className = "feedback " + (ok?"ok":"bad");
+      el.textContent = ok ? "¡Correcto!" : "Inténtalo de nuevo";
+      el.classList.add("show");
+      setTimeout(()=>el.classList.remove("show"), 800);
+      if(extra){
+        try{ if(navigator.vibrate){ navigator.vibrate(ok?[30]:[120,60,80]) } }catch(e){}
+      }
+    }
+    function endGame(){
+      clearInterval(timer);
+      // estrellas
+      const stars = score>=1200 ? "⭐️⭐️⭐️" : score>=700 ? "⭐️⭐️" : "⭐️";
+      $("#stars").textContent = stars;
+      $("#summary").textContent = `Puntos: ${score} — Aciertos: ${stats.ok} — Errores: ${stats.bad}`;
+      // explicaciones (últimas 12)
+      const box = $("#explainList");
+      box.innerHTML = "";
+      stats.explanations.slice(-12).forEach(txt=>{
+        const p = document.createElement("p");
+        p.style.margin="6px 0";
+        p.textContent = "• " + txt;
+        box.appendChild(p);
+      });
+      $("#modal").classList.add("show");
+    }
+    function startTimer(){
+      clearInterval(timer);
+      timeLeft = GAME_TIME;
+      timer = setInterval(()=>{
+        timeLeft--;
+        $("#time").textContent = `Tiempo: ${timeLeft}s`;
+        if(timeLeft<=0){ endGame(); }
+      }, 1000);
+    }
+    function restart(){
+      score=0; lives=START_LIVES; level=1; stats={ok:0,bad:0,explanations:[]};
+      pool = pickPool();
+      nextItem(); updateHUD(); startTimer();
+      $("#modal").classList.remove("show");
+    }
+
+    // =========================
+    //   CLASIFICACIÓN
+    // =========================
+    function classify(targetCat){
+      if(!current) return;
+      const ok = current.cat === targetCat;
+      if(ok){
+        score += POINTS_OK; stats.ok++;
+        stats.explanations.push(`${current.name} → ${current.cat}. ${current.tip}`);
+        feedback(true,true);
+        // Siguiente ítem
+        nextItem();
+      }else{
+        score = Math.max(0, score + POINTS_BAD);
+        lives--;
+        stats.bad++;
+        feedback(false,true);
+        shake($("#itemCard"));
+        if(lives<=0){ endGame(); return; }
+      }
+      updateHUD();
+    }
+    function shake(el){
+      el.animate([
+        {transform:'translateX(0)'},
+        {transform:'translateX(-10px)'},
+        {transform:'translateX(10px)'},
+        {transform:'translateX(0)'}
+      ],{duration:200});
+    }
+
+    // =========================
+    //   INTERACCIÓN (drag/click/teclado)
+    // =========================
+    const itemCard = $("#itemCard");
+    // Drag & Drop (escritorio)
+    itemCard.addEventListener("dragstart", e=>{
+      itemCard.classList.add("dragging");
+      e.dataTransfer.setData("text/plain","ITEM");
+    });
+    itemCard.addEventListener("dragend", ()=>itemCard.classList.remove("dragging"));
+
+    document.querySelectorAll(".bin").forEach(bin=>{
+      bin.addEventListener("dragover", e=>{ e.preventDefault(); bin.classList.add("hover") });
+      bin.addEventListener("dragleave", ()=>bin.classList.remove("hover"));
+      bin.addEventListener("drop", e=>{
+        e.preventDefault(); bin.classList.remove("hover");
+        classify(bin.dataset.cat);
+      });
+      // Click/tap
+      bin.addEventListener("click", ()=> classify(bin.dataset.cat));
+      // Teclado (Enter/Espacio)
+      bin.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); classify(bin.dataset.cat); }
+      });
+    });
+
+    // Botones
+    document.getElementById("btnRestart").addEventListener("click", restart);
+    document.getElementById("btnSkip").addEventListener("click", ()=>{
+      lives--; updateHUD(); nextItem();
+      if(lives<=0){ endGame(); }
+    });
+
+    // Pausa si la pestaña se oculta (no obligatorio, pero mejora UX)
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.hidden){ clearInterval(timer); }
+      else{ startTimer(); }
+    });
+
+    // Inicio
+    (function init(){
+      pool = pickPool(); nextItem(); updateHUD(); startTimer();
+    })();
   </script>
 </body>
 </html>
