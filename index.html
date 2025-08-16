@@ -7,10 +7,10 @@
   <meta name="description" content="Juego educativo de clasificación de residuos: orgánico, reciclable y no aprovechable." />
   <style>
     :root{
-      --bg:#e0f2fe;          /* fondo azul claro */
+      --bg:#ffffff;          /* fondo blanco */
       --text:#111827;        /* texto principal gris oscuro */
       --muted:#6b7280;       /* texto secundario */
-      --card:#f8fafc;        /* tarjetas claras */
+      --card:#ffffff;        /* tarjetas claras */
       --border:#e5e7eb;      /* borde suave */
       --shadow:0 10px 30px rgba(0,0,0,.08);
       --radius:18px;
@@ -44,7 +44,7 @@
       position:sticky;top:0;z-index:5;
     }
     .title{font-weight:800;letter-spacing:.2px}
-    .stat{background:#f3f4f6;border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:14px}
+    .stat{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:14px}
     .wrap{padding:18px}
     .arena{display:grid;grid-template-columns:1fr;gap:18px}
     .itemCard{
@@ -80,7 +80,7 @@
     .bin[data-cat="Orgánico"]{--binColor:var(--bin-org)}
     .bin[data-cat="Reciclable"]{--binColor:var(--bin-rec)}
     .bin[data-cat="No aprovechable"]{--binColor:var(--bin-noap)}
-    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:#f8fafc}
+    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:var(--card)}
     .feedback{
       position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       pointer-events:none;font-size:28px;font-weight:900;letter-spacing:.2px;
@@ -99,10 +99,10 @@
     .modalCard{width:min(560px,100%);background:#fff;border:1px solid var(--border);
                border-radius:18px;box-shadow:var(--shadow);padding:20px;text-align:center;color:var(--text)}
     .stars{font-size:28px;margin:8px 0 2px}
-    .explain{margin-top:10px;text-align:left;background:#f8fafc;border:1px solid var(--border);
+    .explain{margin-top:10px;text-align:left;background:var(--card);border:1px solid var(--border);
              border-radius:14px;padding:12px;max-height:220px;overflow:auto}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
-    .tag{font-size:12px;background:#eef2ff;border:1px solid #dbeafe;padding:4px 8px;border-radius:999px;color:#1e3a8a}
+    .tag{font-size:12px;background:var(--card);border:1px solid var(--border);padding:4px 8px;border-radius:999px;color:#1e3a8a}
     @media (max-width:720px){
       .itemEmoji{font-size:56px}
       .itemName{font-size:20px}
@@ -173,6 +173,7 @@
     const POINTS_OK = 100;
     const POINTS_BAD = -50;
     const LEVEL_SIZE = 10;     // ítems aproximados por nivel
+    const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
 
     // Ítems del juego (editables)
     const ITEMS = [
@@ -256,6 +257,14 @@
         box.appendChild(p);
       });
       $("#modal").classList.add("show");
+      setTimeout(()=>{
+        const nombreCompleto = prompt("Ingresa tu nombre completo:");
+        if(nombreCompleto){
+          const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+          records.push({ nombre: nombreCompleto, puntos: score });
+          localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+        }
+      },100);
     }
     function startTimer(){
       clearInterval(timer);
