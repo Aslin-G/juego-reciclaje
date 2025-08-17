@@ -174,6 +174,7 @@
     const POINTS_BAD = -50;
     const LEVEL_SIZE = 10;     // ítems aproximados por nivel
     const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
+    const WEB_APP_URL = "https://script.google.com/macros/s/WEB_APP_ID/exec";
 
     // Ítems del juego (editables)
     const ITEMS = [
@@ -262,6 +263,27 @@
         localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
       }catch(err){ console.error('No se pudo guardar el registro', err); }
       $("#modal").classList.add("show");
+=======
+      setTimeout(()=>{
+        const nombreCompleto = prompt("Ingresa tu nombre completo:");
+        if(nombreCompleto){
+          const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+          records.push({ nombre: nombreCompleto, puntos: score });
+          localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+          fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: nombreCompleto,
+              puntos: score,
+              ok: stats.ok,
+              bad: stats.bad,
+              explicaciones: stats.explanations
+            })
+          }).catch(err=>console.error('Error enviando datos', err));
+        }
+      },100);
+
     }
     function startTimer(){
       clearInterval(timer);
