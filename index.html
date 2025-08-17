@@ -173,6 +173,7 @@
     const POINTS_OK = 100;
     const POINTS_BAD = -50;
     const LEVEL_SIZE = 10;     // ítems aproximados por nivel
+    const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
 
     // Ítems del juego (editables)
     const ITEMS = [
@@ -255,6 +256,11 @@
         p.textContent = "• " + txt;
         box.appendChild(p);
       });
+      try{
+        const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+        records.push({puntos: score, ok: stats.ok, bad: stats.bad, explicaciones: stats.explanations});
+        localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+      }catch(err){ console.error('No se pudo guardar el registro', err); }
       $("#modal").classList.add("show");
     }
     function startTimer(){
