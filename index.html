@@ -173,26 +173,44 @@
     const POINTS_OK = 100;
     const POINTS_BAD = -50;
     const LEVEL_SIZE = 10;     // ítems aproximados por nivel
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxa1FR9jv1hyoe590Pt3bY760Oghl7Q8BCZ9w-wrmOJw6p7A4aJghdB7tczfiyVDbGEeg/exec";
+=======
     const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
     const WEB_APP_URL = "https://script.google.com/macros/s/WEB_APP_ID/exec";
-
     // Ítems del juego (editables)
     const ITEMS = [
       {name:"Cáscara de plátano", emoji:"🍌", cat:"Orgánico", tip:"Restos de frutas y verduras son compostables."},
       {name:"Hojas secas", emoji:"🍂", cat:"Orgánico", tip:"Material ideal para compost."},
       {name:"Café molido usado", emoji:"☕️", cat:"Orgánico", tip:"Aporta nitrógeno al compost."},
+      {name:"Cáscara de huevo", emoji:"🥚", cat:"Orgánico", tip:"Se puede compostar (mejor triturada)."},
+      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."},
+      {name:"Cáscara de naranja", emoji:"🍊", cat:"Orgánico", tip:"Las cáscaras de cítricos también son compostables."},
+      {name:"Posos de té", emoji:"🍵", cat:"Orgánico", tip:"Tras usarlo, el té se convierte en un buen abono."},
+      {name:"Pan duro", emoji:"🥖", cat:"Orgánico", tip:"El pan viejo puede compostarse si no tiene moho."},
+      {name:"Ramas pequeñas", emoji:"🌿", cat:"Orgánico", tip:"Tritúralas para acelerar el compostaje."},
+      {name:"Yerba mate usada", emoji:"🧉", cat:"Orgánico", tip:"Aporta nutrientes al compost."},
+
       {name:"Botella plástica (PET)", emoji:"🥤", cat:"Reciclable", tip:"Enjuaga y aplasta para reciclar."},
       {name:"Lata de aluminio", emoji:"🥫", cat:"Reciclable", tip:"El aluminio es altamente reciclable."},
       {name:"Papel/Cartón limpio", emoji:"📄", cat:"Reciclable", tip:"Evita mezclarlo con comida o grasa."},
       {name:"Botella de vidrio", emoji:"🍾", cat:"Reciclable", tip:"El vidrio se recicla infinitas veces."},
+      {name:"Revista", emoji:"📚", cat:"Reciclable", tip:"Si está seca y limpia, se recicla."},
+      {name:"Caja de cartón", emoji:"📦", cat:"Reciclable", tip:"Dobla y mantén seca para reciclar."},
+      {name:"Periódico", emoji:"📰", cat:"Reciclable", tip:"El papel periódico seco se recicla."},
+      {name:"Bolsa de papel", emoji:"🛍️", cat:"Reciclable", tip:"Reutiliza y recicla las bolsas de papel."},
+      {name:"Frasco de vidrio", emoji:"🧴", cat:"Reciclable", tip:"Retira la tapa y limpia antes de reciclar."},
+      {name:"Bote de aerosol vacío", emoji:"🧪", cat:"Reciclable", tip:"Asegúrate de que esté completamente vacío."},
+      {name:"Lata de conservas", emoji:"🥫", cat:"Reciclable", tip:"Enjuaga para facilitar el reciclaje."},
+
       {name:"Servilleta sucia", emoji:"🧻", cat:"No aprovechable", tip:"Contaminada: va a no aprovechable."},
       {name:"Paquete de snacks", emoji:"🍟", cat:"No aprovechable", tip:"Multicapa difícil de reciclar."},
       {name:"Colilla de cigarrillo", emoji:"🚬", cat:"No aprovechable", tip:"Desecho contaminante, nunca al piso."},
       {name:"Pañal desechable", emoji:"🍼", cat:"No aprovechable", tip:"Residuos sanitarios → no aprovechable."},
-      {name:"Cáscara de huevo", emoji:"🥚", cat:"Orgánico", tip:"Se puede compostar (mejor triturada)."},
-      {name:"Revista", emoji:"📚", cat:"Reciclable", tip:"Si está seca y limpia, se recicla."},
-      {name:"Caja de cartón", emoji:"📦", cat:"Reciclable", tip:"Dobla y mantén seca para reciclar."},
-      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."}
+      {name:"Envase de icopor", emoji:"🍱", cat:"No aprovechable", tip:"El icopor no se recicla, deposítalo en no aprovechable."},
+      {name:"Chicle", emoji:"🍬", cat:"No aprovechable", tip:"No es biodegradable; deséchalo en no aprovechable."},
+      {name:"Cepillo de dientes usado", emoji:"🪥", cat:"No aprovechable", tip:"Contiene mezclas de materiales difíciles de reciclar."},
+      {name:"CD o DVD roto", emoji:"💿", cat:"No aprovechable", tip:"La mezcla de materiales impide su reciclaje."},
+      {name:"Esponja de cocina gastada", emoji:"🧽", cat:"No aprovechable", tip:"Acumula bacterias y no es reciclable."}
     ];
 
     // =========================
@@ -257,6 +275,19 @@
         p.textContent = "• " + txt;
         box.appendChild(p);
       });
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: 'Anónimo',
+          puntos: score,
+          ok: stats.ok,
+          bad: stats.bad,
+          explicaciones: stats.explanations
+        })
+      }).catch(err => console.error('No se pudo enviar al registro', err));
+      $("#modal").classList.add("show");
+=======
       try{
         const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
         records.push({puntos: score, ok: stats.ok, bad: stats.bad, explicaciones: stats.explanations});
@@ -283,7 +314,6 @@
           }).catch(err=>console.error('Error enviando datos', err));
         }
       },100);
-
     }
     function startTimer(){
       clearInterval(timer);
