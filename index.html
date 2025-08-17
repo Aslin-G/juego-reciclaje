@@ -1,410 +1,393 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clasifica & Gana: Reciclaje</title>
-  <meta name="description" content="Juego educativo de clasificación de residuos: orgánico, reciclable y no aprovechable." />
-  <style>
-    :root{
-      --bg:#ffffff;          /* fondo blanco solicitado */
-      --text:#111827;        /* texto principal gris oscuro */
-      --muted:#6b7280;       /* texto secundario */
-      --card:#f8fafc;        /* tarjetas claras */
-      --border:#e5e7eb;      /* borde suave */
-      --shadow:0 10px 30px rgba(0,0,0,.08);
-      --radius:18px;
-      --ok:#16a34a;          /* correcto */
-      --bad:#ef4444;         /* incorrecto */
-      --accent:#2563eb;      /* acento */
-      --accent2:#22c55e;     /* acento secundario */
-      --bin-org:#22c55e;
-      --bin-rec:#38bdf8;
-      --bin-noap:#f59e0b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-    body{background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:16px}
-    .game{
-      width:min(1000px,100%);
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .topbar{
-      display:grid;
-      grid-template-columns:1fr auto auto auto auto;
-      gap:12px;
-      align-items:center;
-      padding:16px 18px;
-      background:#fff;
-      border-bottom:1px solid var(--border);
-      position:sticky;top:0;z-index:5;
-    }
-    .title{font-weight:800;letter-spacing:.2px}
-    .stat{background:#f3f4f6;border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:14px}
-    .wrap{padding:18px}
-    .arena{display:grid;grid-template-columns:1fr;gap:18px}
-    .itemCard{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:18px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      min-height:200px;
-      position:relative;
-      text-align:center;
-      box-shadow:var(--shadow);
-      transition:transform .2s ease, background-color .2s ease;
-      user-select:none;
-    }
-    .itemCard.dragging{opacity:.95;transform:scale(1.015)}
-    .itemEmoji{font-size:68px;line-height:1.1;margin-bottom:8px}
-    .itemName{font-size:24px;font-weight:800;margin-bottom:6px}
-    .hint{font-size:14px;color:var(--muted)}
-    .bins{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .bin{
-      background:#fff;
-      border:2px dashed var(--border);
-      border-radius:16px;
-      padding:16px;
-      text-align:center;
-      transition:transform .12s ease,border-color .12s ease,background .12s ease;
-      min-height:130px;
-      position:relative;
-    }
-    .binLabel{font-weight:800;margin-top:6px}
-    .binEmoji{font-size:36px}
-    .bin[data-cat="Orgánico"]{--binColor:var(--bin-org)}
-    .bin[data-cat="Reciclable"]{--binColor:var(--bin-rec)}
-    .bin[data-cat="No aprovechable"]{--binColor:var(--bin-noap)}
-    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:#f8fafc}
-    .feedback{
-      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      pointer-events:none;font-size:28px;font-weight:900;letter-spacing:.2px;
-      opacity:0;transform:translateY(10px);transition:opacity .22s ease,transform .22s ease;
-    }
-    .feedback.show{opacity:1;transform:translateY(0)}
-    .feedback.ok{color:var(--ok)}
-    .feedback.bad{color:var(--bad)}
-    .footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-    .btn{background:linear-gradient(180deg,var(--accent),#1e40af);border:none;color:white;
-         font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
-    .btn.secondary{background:linear-gradient(180deg,var(--accent2),#15803d)}
-    /* Modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
-    .modal.show{display:flex}
-    .modalCard{width:min(560px,100%);background:#fff;border:1px solid var(--border);
-               border-radius:18px;box-shadow:var(--shadow);padding:20px;text-align:center;color:var(--text)}
-    .stars{font-size:28px;margin:8px 0 2px}
-    .explain{margin-top:10px;text-align:left;background:#f8fafc;border:1px solid var(--border);
-             border-radius:14px;padding:12px;max-height:220px;overflow:auto}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
-    .tag{font-size:12px;background:#eef2ff;border:1px solid #dbeafe;padding:4px 8px;border-radius:999px;color:#1e3a8a}
-    @media (max-width:720px){
-      .itemEmoji{font-size:56px}
-      .itemName{font-size:20px}
-      .bins{gap:10px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clasifica & Gana: Reciclaje</title>
+<style>
+  :root{
+    --bg:#f6f8fa;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --ok:#10b981;
+    --bad:#ef4444;
+    --card:#ffffff;
+    --shadow:0 8px 30px rgba(0,0,0,.06);
+    --org:#19a974;     /* Verde - orgánicos */
+    --rec:#ffffff;     /* Blanco - reciclables */
+    --noa:#111827;     /* Negro - no aprovechables */
+    --pel:#e11d48;     /* Rojo - peligrosos/posconsumo */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+       background:linear-gradient(180deg,#f9fafb, #eef2f7 60%, #e5ebf2);}
+  .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+  .title{display:flex;align-items:center;gap:10px;color:#065f46;font-weight:800;letter-spacing:.2px}
+  .hud{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 22px}
+  .pill{background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:8px 12px;
+        box-shadow:var(--shadow);font-weight:600;color:#334155}
+  .timerbar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:6px 0 0}
+  .bar{height:100%;width:100%;background:#22c55e;transition:width .2s linear}
+  .card{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:22px}
+  .arena{display:grid;gap:18px}
+  .itembox{min-height:130px;border:2px dashed #d1d5db;border-radius:16px;display:flex;
+           align-items:center;justify-content:center;color:var(--muted);text-align:center;
+           background:#fbfbfd}
+  .item{display:inline-flex;flex-direction:column;align-items:center;gap:8px;
+        padding:16px 22px;border-radius:16px;background:#fff;border:1px solid #e5e7eb;
+        cursor:grab;box-shadow:var(--shadow)}
+  .emoji{font-size:40px;line-height:1}
+  .name{font-size:20px;font-weight:800;color:#111827}
+  .hint{font-size:13px;color:var(--muted)}
+  .bins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:8px}
+  @media(min-width:800px){ .arena{grid-template-columns:1fr} .bins{grid-template-columns:repeat(4,1fr)}}
+  .bin{border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;
+       align-items:center;justify-content:center;cursor:pointer;min-height:110px;
+       border:2px solid #e5e7eb;transition:transform .06s ease}
+  .bin:active{transform:scale(.98)}
+  .bin h3{margin:2px 0 0;font-size:16px}
+  .tag{font-size:12px;opacity:.8}
+  .bin.org{background:linear-gradient(#e9fff4,#dbfbea);border-color:#b7f2cf}
+  .bin.rec{background:linear-gradient(#ffffff,#f9fafb);border-color:#d1d5db}
+  .bin.noa{background:linear-gradient(#1f2937,#111827);border-color:#111827;color:#f9fafb}
+  .bin.pel{background:linear-gradient(#ffe4e6,#fecdd3);border-color:#fda4af}
+  .bin .big{font-size:32px}
+  .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  button{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .ghost{background:#eef2f7;color:#374151}
+  .primary{background:#0ea5e9;color:white}
+  .success{background:#10b981;color:white}
+  .danger{background:#ef4444;color:white}
+  .toast{margin-top:14px;padding:12px 14px;border-radius:12px;background:#f9fafb;
+         border:1px solid #e5e7eb;color:#334155}
+  .toast.ok{border-color:#bbf7d0;background:#ecfdf5;color:#065f46}
+  .toast.bad{border-color:#fecaca;background:#fef2f2;color:#7f1d1d}
+  .end{padding:22px}
+  .grid{display:grid;gap:8px}
+  .mistakes{max-height:260px;overflow:auto;border:1px dashed #e5e7eb;border-radius:12px;padding:10px;background:#fff}
+  .mistakes li{margin:6px 0}
+  .legend{margin-top:20px;display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
+  .legend .key{display:flex;gap:8px;align-items:center;font-size:12px}
+  .dot{width:14px;height:14px;border-radius:50%}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
+       padding:2px 6px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:12px}
+</style>
 </head>
 <body>
-  <div class="game" role="application" aria-label="Juego educativo de reciclaje">
-    <div class="topbar">
-      <div class="title">♻️ Clasifica & Gana: Reciclaje</div>
-      <div class="stat" id="level">Nivel: 1</div>
-      <div class="stat" id="score">Puntos: 0</div>
-      <div class="stat" id="lives">Vidas: 3</div>
-      <div class="stat" id="time">Tiempo: 60s</div>
-    </div>
-    <div class="wrap">
-      <div class="arena">
-        <div id="itemCard" class="itemCard" draggable="true" aria-grabbed="false">
-          <div class="itemEmoji" id="itemEmoji">🍌</div>
-          <div class="itemName" id="itemName">Cáscara de plátano</div>
-          <div class="hint">Arrastra al contenedor correcto o toca un contenedor para clasificar.</div>
-          <div class="feedback" id="feedback" aria-live="polite"></div>
-        </div>
-        <div class="bins" aria-label="Contenedores de reciclaje">
-          <div class="bin" data-cat="Orgánico" tabindex="0" aria-label="Contenedor Orgánico">
-            <div class="binEmoji">🌿</div>
-            <div class="binLabel">Orgánico</div>
-          </div>
-          <div class="bin" data-cat="Reciclable" tabindex="0" aria-label="Contenedor Reciclable">
-            <div class="binEmoji">♻️</div>
-            <div class="binLabel">Reciclable</div>
-          </div>
-          <div class="bin" data-cat="No aprovechable" tabindex="0" aria-label="Contenedor No aprovechable">
-            <div class="binEmoji">🗑️</div>
-            <div class="binLabel">No aprovechable</div>
-          </div>
-        </div>
-        <div class="footer">
-          Consejo: puedes <b>hacer clic</b> en el contenedor si no quieres arrastrar. Cambia o añade objetos en el arreglo <code>ITEMS</code> para personalizar. 
-          <button class="btn secondary" id="btnSkip" title="Saltar ítem (pierdes 1 vida)">Saltar</button>
-        </div>
-      </div>
-    </div>
+<div class="wrap">
+  <div class="title">
+    <span style="font-size:26px">♻️</span>
+    <h1 style="margin:0;font-size:22px">Clasifica & Gana: Reciclaje</h1>
   </div>
-  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="Resultados">
-    <div class="modalCard">
-      <h2>🎉 ¡Fin del juego!</h2>
-      <div class="stars" id="stars">⭐️⭐️⭐️</div>
-      <p id="summary">Puntos: 0 — Aciertos: 0 — Errores: 0</p>
-      <div class="row" style="margin:10px 0 12px">
-        <span class="tag">Orgánico = 🌿</span>
-        <span class="tag">Reciclable = ♻️</span>
-        <span class="tag">No aprovechable = 🗑️</span>
-      </div>
-      <div class="explain" id="explainList"></div>
-      <div style="margin-top:14px">
-        <button class="btn" id="btnRestart">Jugar de nuevo</button>
+
+  <div class="hud">
+    <div class="pill">⏱️ Tiempo: <span id="time">60</span>s
+      <div class="timerbar"><div class="bar" id="bar"></div></div>
+    </div>
+    <div class="pill">⭐ Puntos: <span id="score">0</span></div>
+    <div class="pill">✅ Aciertos: <span id="hits">0</span></div>
+    <div class="pill">🔥 Racha: <span id="streak">0</span></div>
+  </div>
+
+  <div class="arena card" id="game">
+    <div class="itembox" id="dropzone">
+      <div id="item" class="item" draggable="true" aria-grabbed="true">
+        <div class="emoji" id="emoji">🗳️</div>
+        <div class="name" id="name">Pulsa “Iniciar”</div>
+        <div class="hint">Arrastra al contenedor correcto o presiona <span class="kbd">1</span>–<span class="kbd">4</span></div>
       </div>
     </div>
+
+    <div class="bins">
+      <div class="bin org" data-cat="organico" tabindex="0" aria-label="Orgánico (tecla 1)">
+        <div class="big">🌿</div><h3>Orgánico</h3><div class="tag">Verde</div>
+      </div>
+      <div class="bin rec" data-cat="reciclable" tabindex="0" aria-label="Reciclable (tecla 2)">
+        <div class="big">♻️</div><h3>Reciclable</h3><div class="tag">Blanco</div>
+      </div>
+      <div class="bin noa" data-cat="no_aprovechable" tabindex="0" aria-label="No aprovechable (tecla 3)">
+        <div class="big">🗑️</div><h3>No aprovechable</h3><div class="tag">Negro</div>
+      </div>
+      <div class="bin pel" data-cat="peligroso" tabindex="0" aria-label="Peligroso (tecla 4)">
+        <div class="big">⚠️</div><h3>Peligroso / Posconsumo</h3><div class="tag">Rojo</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="startBtn">Iniciar (60 s)</button>
+      <button class="ghost" id="skipBtn" title="Saltar este elemento (–2 pts)">Saltar</button>
+      <button class="ghost" id="howBtn">¿Cómo se clasifica?</button>
+      <button class="success" id="restartBtn" style="display:none">Reiniciar</button>
+    </div>
+
+    <div class="toast" id="toast">Consejo: limpia y seca lo reciclable; si está muy sucio, va a “No aprovechable”.</div>
   </div>
-  <script>
-    // =========================
-    //   CONFIGURACIÓN DEL JUEGO
-    // =========================
-    const GAME_TIME = 60;      // segundos por ronda
-    const START_LIVES = 3;
-    const POINTS_OK = 100;
-    const POINTS_BAD = -50;
-    const LEVEL_SIZE = 10;     // ítems aproximados por nivel
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxa1FR9jv1hyoe590Pt3bY760Oghl7Q8BCZ9w-wrmOJw6p7A4aJghdB7tczfiyVDbGEeg/exec";
-=======
-    const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
-    const WEB_APP_URL = "https://script.google.com/macros/s/WEB_APP_ID/exec";
-    // Ítems del juego (editables)
-    const ITEMS = [
-      {name:"Cáscara de plátano", emoji:"🍌", cat:"Orgánico", tip:"Restos de frutas y verduras son compostables."},
-      {name:"Hojas secas", emoji:"🍂", cat:"Orgánico", tip:"Material ideal para compost."},
-      {name:"Café molido usado", emoji:"☕️", cat:"Orgánico", tip:"Aporta nitrógeno al compost."},
-      {name:"Cáscara de huevo", emoji:"🥚", cat:"Orgánico", tip:"Se puede compostar (mejor triturada)."},
-      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."},
-      {name:"Cáscara de naranja", emoji:"🍊", cat:"Orgánico", tip:"Las cáscaras de cítricos también son compostables."},
-      {name:"Posos de té", emoji:"🍵", cat:"Orgánico", tip:"Tras usarlo, el té se convierte en un buen abono."},
-      {name:"Pan duro", emoji:"🥖", cat:"Orgánico", tip:"El pan viejo puede compostarse si no tiene moho."},
-      {name:"Ramas pequeñas", emoji:"🌿", cat:"Orgánico", tip:"Tritúralas para acelerar el compostaje."},
-      {name:"Yerba mate usada", emoji:"🧉", cat:"Orgánico", tip:"Aporta nutrientes al compost."},
 
-      {name:"Botella plástica (PET)", emoji:"🥤", cat:"Reciclable", tip:"Enjuaga y aplasta para reciclar."},
-      {name:"Lata de aluminio", emoji:"🥫", cat:"Reciclable", tip:"El aluminio es altamente reciclable."},
-      {name:"Papel/Cartón limpio", emoji:"📄", cat:"Reciclable", tip:"Evita mezclarlo con comida o grasa."},
-      {name:"Botella de vidrio", emoji:"🍾", cat:"Reciclable", tip:"El vidrio se recicla infinitas veces."},
-      {name:"Revista", emoji:"📚", cat:"Reciclable", tip:"Si está seca y limpia, se recicla."},
-      {name:"Caja de cartón", emoji:"📦", cat:"Reciclable", tip:"Dobla y mantén seca para reciclar."},
-      {name:"Periódico", emoji:"📰", cat:"Reciclable", tip:"El papel periódico seco se recicla."},
-      {name:"Bolsa de papel", emoji:"🛍️", cat:"Reciclable", tip:"Reutiliza y recicla las bolsas de papel."},
-      {name:"Frasco de vidrio", emoji:"🧴", cat:"Reciclable", tip:"Retira la tapa y limpia antes de reciclar."},
-      {name:"Bote de aerosol vacío", emoji:"🧪", cat:"Reciclable", tip:"Asegúrate de que esté completamente vacío."},
-      {name:"Lata de conservas", emoji:"🥫", cat:"Reciclable", tip:"Enjuaga para facilitar el reciclaje."},
+  <div class="legend">
+    <div class="key"><span class="dot" style="background:var(--org)"></span>Orgánico (verde)</div>
+    <div class="key"><span class="dot" style="background:var(--rec);border:1px solid #d1d5db"></span>Reciclable (blanco)</div>
+    <div class="key"><span class="dot" style="background:var(--noa)"></span>No aprovechable (negro)</div>
+    <div class="key"><span class="dot" style="background:var(--pel)"></span>Peligroso/posconsumo (rojo)</div>
+  </div>
+</div>
 
-      {name:"Servilleta sucia", emoji:"🧻", cat:"No aprovechable", tip:"Contaminada: va a no aprovechable."},
-      {name:"Paquete de snacks", emoji:"🍟", cat:"No aprovechable", tip:"Multicapa difícil de reciclar."},
-      {name:"Colilla de cigarrillo", emoji:"🚬", cat:"No aprovechable", tip:"Desecho contaminante, nunca al piso."},
-      {name:"Pañal desechable", emoji:"🍼", cat:"No aprovechable", tip:"Residuos sanitarios → no aprovechable."},
-      {name:"Envase de icopor", emoji:"🍱", cat:"No aprovechable", tip:"El icopor no se recicla, deposítalo en no aprovechable."},
-      {name:"Chicle", emoji:"🍬", cat:"No aprovechable", tip:"No es biodegradable; deséchalo en no aprovechable."},
-      {name:"Cepillo de dientes usado", emoji:"🪥", cat:"No aprovechable", tip:"Contiene mezclas de materiales difíciles de reciclar."},
-      {name:"CD o DVD roto", emoji:"💿", cat:"No aprovechable", tip:"La mezcla de materiales impide su reciclaje."},
-      {name:"Esponja de cocina gastada", emoji:"🧽", cat:"No aprovechable", tip:"Acumula bacterias y no es reciclable."}
-    ];
+<script>
+/* =======================
+   Banco de ítems (80+)
+   cat: organico | reciclable | no_aprovechable | peligroso
+   ======================= */
+const ITEMS = [
+  // ORGÁNICOS
+  ["Cáscara de plátano","organico","🍌","Se compostea; aporta potasio al abono."],
+  ["Restos de arroz","organico","🍚","Orgánico aprovechable: compost o lombricultura."],
+  ["Restos de verduras","organico","🥗","Orgánico; ideal para compost casero."],
+  ["Posos de café","organico","☕","Excelente para compost; aporta nitrógeno."],
+  ["Bolsita de té","organico","🫖","Orgánica si NO tiene grapas/estaples."],
+  ["Cáscaras de huevo","organico","🥚","Orgánico; tritúralas antes de compostar."],
+  ["Hojas secas","organico","🍂","Materia ‘marrón’ para balancear el compost."],
+  ["Podas de jardín","organico","🌿","Orgánico; pica ramas para acelerar."],
+  ["Pan duro","organico","🍞","Orgánico; mejor troceado para compost."],
+  ["Cáscara de naranja","organico","🍊","Orgánico; en poca cantidad por acidez."],
+  ["Cáscara de papa","organico","🥔","Orgánico; evita grandes cantidades crudas."],
+  ["Restos de frutas","organico","🍉","Orgánico; no mezclar con bolsas."],
+  ["Huesos de pollo","organico","🍗","Orgánico; tardan más en descomponerse."],
+  ["Restos de pescado","organico","🐟","Orgánico; cúbrelos en el compost para evitar olores."],
+  ["Cáscara de maní","organico","🥜","Orgánica; dura pero compostable."],
+  ["Bagazo de caña","organico","🧉","Fibra orgánica para compost."],
+  ["Aserrín limpio","organico","🪵","Solo si es madera natural (sin barnices)."],
+  ["Sobras de comida cocida","organico","🍽️","Orgánico; mejor en compostaje caliente."],
+  ["Cáscara de coco","organico","🥥","Orgánica; trocea para acelerar."],
 
-    // =========================
-    //   ESTADO
-    // =========================
-    let pool = [];         // bolsa de ítems para el nivel
-    let current = null;    // ítem actual
-    let score = 0;
-    let lives = START_LIVES;
-    let level = 1;
-    let timeLeft = GAME_TIME;
-    let timer = null;
-    let stats = {ok:0,bad:0,explanations:[]};
+  // RECICLABLES (limpios y secos)
+  ["Botella PET transparente","reciclable","🥤","Enjuaga y aplasta; tapa aparte."],
+  ["Botella PET de color","reciclable","🧴","Clasifícala con otras PET; limpia y seca."],
+  ["Tapa plástica","reciclable","🔵","Reciclable; junta varias tapas para donación."],
+  ["Bolsa plástica limpia","reciclable","🛍️","Reciclable si está limpia y seca."],
+  ["Lata de aluminio","reciclable","🥫","Aplástala limpia; es de alto valor."],
+  ["Lata de acero","reciclable","🥫","Reciclable; limpia para evitar malos olores."],
+  ["Envase de vidrio transparente","reciclable","🍾","Retira tapas; no mezcles con cerámica."],
+  ["Frasco de vidrio ámbar","reciclable","🧪","Vidrio reciclable; limpio y sin tapa."],
+  ["Papel bond limpio","reciclable","📄","No engrapado/engomado en exceso."],
+  ["Cartón corrugado","reciclable","📦","Manténlo seco; pliega las cajas."],
+  ["Periódico limpio","reciclable","🗞️","Útil para reciclaje de papel."],
+  ["Revista","reciclable","📚","Reciclable; evita plastificados con comida."],
+  ["Cartón para bebidas (Tetra Pak) limpio","reciclable","🧃","Enjuaga y aplasta; sí se recicla en muchas ciudades."],
+  ["Lata de atún limpia","reciclable","🥫","Lávalas para evitar contaminación."],
+  ["Botella de champú HDPE enjuagada","reciclable","🧴","Plástico #2: alta reciclabilidad."],
+  ["Galón de detergente enjuagado","reciclable","🧼","Plástico #2/#5; reciclar limpio y seco."],
+  ["Papel aluminio limpio","reciclable","🧻","Si está limpio y hecho bola, se recicla."],
+  ["Bandeja de PP (No.5) limpia","reciclable","🍱","Si está limpia, puede reciclarse."],
+  ["Tapas metálicas","reciclable","🧲","Júntalas; son ferrosas y reciclables."],
+  ["Tubos de cartón (higiénico) limpios","reciclable","🧻","Reciclable si no está sucio."],
+  ["Caja de huevos de cartón limpia","reciclable","🥚","Reciclable o compostable si no está sucia."],
+  ["Botella de vidrio verde","reciclable","🍾","Separa por colores si es posible."],
+  ["Botella de aceite vacía y enjuagada (PET)","reciclable","🛢️","Vacía bien; no mezcles con aceite usado."],
+  ["Folder de cartulina limpio","reciclable","📁","Papel/cartón reciclable."],
 
-    // =========================
-    //   UTILIDADES
-    // =========================
-    const $ = sel => document.querySelector(sel);
-    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-    function pickPool(){
-      const copy = shuffle([...ITEMS]);
-      const size = Math.min(LEVEL_SIZE + (level-1)*4, ITEMS.length);
-      return copy.slice(0,size);
-    }
-    function updateHUD(){
-      $("#score").textContent = `Puntos: ${score}`;
-      $("#lives").textContent = `Vidas: ${lives}`;
-      $("#level").textContent = `Nivel: ${level}`;
-      $("#time").textContent = `Tiempo: ${timeLeft}s`;
-    }
-    function nextItem(){
-      if(pool.length===0){ // Siguiente nivel aumenta dificultad al usar más ítems
-        level++;
-        pool = pickPool();
-      }
-      current = pool.pop();
-      $("#itemEmoji").textContent = current.emoji;
-      $("#itemName").textContent = current.name;
-    }
-    function feedback(ok, extra){
-      const el = $("#feedback");
-      el.className = "feedback " + (ok?"ok":"bad");
-      el.textContent = ok ? "¡Correcto!" : "Inténtalo de nuevo";
-      el.classList.add("show");
-      setTimeout(()=>el.classList.remove("show"), 800);
-      if(extra){
-        try{ if(navigator.vibrate){ navigator.vibrate(ok?[30]:[120,60,80]) } }catch(e){}
-      }
-    }
-    function endGame(){
-      clearInterval(timer);
-      // estrellas
-      const stars = score>=1200 ? "⭐️⭐️⭐️" : score>=700 ? "⭐️⭐️" : "⭐️";
-      $("#stars").textContent = stars;
-      $("#summary").textContent = `Puntos: ${score} — Aciertos: ${stats.ok} — Errores: ${stats.bad}`;
-      // explicaciones (últimas 12)
-      const box = $("#explainList");
-      box.innerHTML = "";
-      stats.explanations.slice(-12).forEach(txt=>{
-        const p = document.createElement("p");
-        p.style.margin="6px 0";
-        p.textContent = "• " + txt;
-        box.appendChild(p);
-      });
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: 'Anónimo',
-          puntos: score,
-          ok: stats.ok,
-          bad: stats.bad,
-          explicaciones: stats.explanations
-        })
-      }).catch(err => console.error('No se pudo enviar al registro', err));
-      $("#modal").classList.add("show");
-=======
-      try{
-        const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-        records.push({puntos: score, ok: stats.ok, bad: stats.bad, explicaciones: stats.explanations});
-        localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-      }catch(err){ console.error('No se pudo guardar el registro', err); }
-      $("#modal").classList.add("show");
-=======
-      setTimeout(()=>{
-        const nombreCompleto = prompt("Ingresa tu nombre completo:");
-        if(nombreCompleto){
-          const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-          records.push({ nombre: nombreCompleto, puntos: score });
-          localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-          fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nombre: nombreCompleto,
-              puntos: score,
-              ok: stats.ok,
-              bad: stats.bad,
-              explicaciones: stats.explanations
-            })
-          }).catch(err=>console.error('Error enviando datos', err));
-        }
-      },100);
-    }
-    function startTimer(){
-      clearInterval(timer);
-      timeLeft = GAME_TIME;
-      timer = setInterval(()=>{
-        timeLeft--;
-        $("#time").textContent = `Tiempo: ${timeLeft}s`;
-        if(timeLeft<=0){ endGame(); }
-      }, 1000);
-    }
-    function restart(){
-      score=0; lives=START_LIVES; level=1; stats={ok:0,bad:0,explanations:[]};
-      pool = pickPool();
-      nextItem(); updateHUD(); startTimer();
-      $("#modal").classList.remove("show");
-    }
+  // NO APROVECHABLES (basura)
+  ["Pañal desechable","no_aprovechable","🍼","Residuo sanitario: bolsa negra."],
+  ["Papel higiénico usado","no_aprovechable","🚽","Sanitario: NO va con reciclables."],
+  ["Toalla higiénica","no_aprovechable","🩸","Sanitario: disponer en negro."],
+  ["Servilleta muy sucia con grasa","no_aprovechable","🥯","Si está muy sucia, ya no se recicla."],
+  ["Papel metalizado de snacks","no_aprovechable","🍬","Multicapa metalizada: no reciclable doméstico."],
+  ["Vaso de icopor (EPS) sucio","no_aprovechable","🥤","Si está sucio, va a negro; limpio depende de tu ciudad."],
+  ["Plástico film con restos de comida","no_aprovechable","🧆","Contaminado: negro."],
+  ["Cepillo de dientes viejo","no_aprovechable","🪥","No reciclable municipal; cámbialo por bambú."],
+  ["Cerámica rota","no_aprovechable","🧱","No es vidrio; no se recicla en envases."],
+  ["Espejo roto","no_aprovechable","🪞","No es vidrio de envase; envuélvelo para evitar cortes."],
+  ["Colilla de cigarrillo","no_aprovechable","🚬","Tóxica; nunca al piso ni al WC."],
+  ["Chicle","no_aprovechable","🍬","Residuos pequeños: negro."],
+  ["Esponja de cocina usada","no_aprovechable","🧽","Se desgasta y contamina: negro."],
+  ["Plato de loza roto","no_aprovechable","🍽️","No reciclable; negro."],
+  ["Envase de yogur muy sucio","no_aprovechable","🥛","Si no puedes lavarlo, basura negra."],
+  ["Papel carbón","no_aprovechable","📜","No reciclable por su tratamiento."],
+  ["Lapicero gastado","no_aprovechable","🖊️","Mezcla de materiales: negro."],
+  ["Polvo de aspiradora / pelusas","no_aprovechable","🧹","Negro; no reciclable."],
 
-    // =========================
-    //   CLASIFICACIÓN
-    // =========================
-    function classify(targetCat){
-      if(!current) return;
-      const ok = current.cat === targetCat;
-      if(ok){
-        score += POINTS_OK; stats.ok++;
-        stats.explanations.push(`${current.name} → ${current.cat}. ${current.tip}`);
-        feedback(true,true);
-        // Siguiente ítem
-        nextItem();
-      }else{
-        score = Math.max(0, score + POINTS_BAD);
-        lives--;
-        stats.bad++;
-        feedback(false,true);
-        shake($("#itemCard"));
-        if(lives<=0){ endGame(); return; }
-      }
-      updateHUD();
-    }
-    function shake(el){
-      el.animate([
-        {transform:'translateX(0)'},
-        {transform:'translateX(-10px)'},
-        {transform:'translateX(10px)'},
-        {transform:'translateX(0)'}
-      ],{duration:200});
-    }
+  // PELIGROSOS / POSCONSUMO
+  ["Pila AA / AAA","peligroso","🔋","Llévala a puntos de posconsumo (rojo)."],
+  ["Batería de celular","peligroso","📱","Altamente contaminante; posconsumo."],
+  ["Bombillo fluorescente","peligroso","💡","Contiene mercurio; manejo especial."],
+  ["Aceite de cocina usado","peligroso","🛢️","Nunca al lavaplatos; almacena y entrega."],
+  ["Medicamentos vencidos","peligroso","💊","Llévalos a puntos de recolección."],
+  ["Jeringa/aguja","peligroso","💉","Cortopunzante; contenedor rojo rígido."],
+  ["Termómetro de mercurio","peligroso","🌡️","Peligroso por mercurio; no romper."],
+  ["Pinturas y solventes","peligroso","🎨","Inflamables/tóxicos; punto especial."],
+  ["Insecticida","peligroso","🪰","Químico: posconsumo."],
+  ["Aerosol con contenido","peligroso","🧴","Presurizado y peligroso; rojo."],
+  ["Tóner de impresora","peligroso","🖨️","Recolecta en puntos posconsumo."],
+  ["Pila botón","peligroso","🔘","Muy contaminante; rojo."],
+  ["Pegante industrial","peligroso","🧷","Solventes; no al reciclaje."],
+  ["Thinner / disolvente","peligroso","🧪","Punto especializado."],
+  ["Batería de automóvil","peligroso","🚗","Plomo/ácido: gestor autorizado."],
+  ["Cosmético con químicos (residuo)","peligroso","💄","Si contiene químicos, manejo especial."]
+];
 
-    // =========================
-    //   INTERACCIÓN (drag/click/teclado)
-    // =========================
-    const itemCard = $("#itemCard");
-    // Drag & Drop (escritorio)
-    itemCard.addEventListener("dragstart", e=>{
-      itemCard.classList.add("dragging");
-      e.dataTransfer.setData("text/plain","ITEM");
-    });
-    itemCard.addEventListener("dragend", ()=>itemCard.classList.remove("dragging"));
+// Utilidades
+const $ = s => document.querySelector(s);
+const byId = id => document.getElementById(id);
+const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const shuffle = arr => arr.sort(()=>Math.random()-0.5);
 
-    document.querySelectorAll(".bin").forEach(bin=>{
-      bin.addEventListener("dragover", e=>{ e.preventDefault(); bin.classList.add("hover") });
-      bin.addEventListener("dragleave", ()=>bin.classList.remove("hover"));
-      bin.addEventListener("drop", e=>{
-        e.preventDefault(); bin.classList.remove("hover");
-        classify(bin.dataset.cat);
-      });
-      // Click/tap
-      bin.addEventListener("click", ()=> classify(bin.dataset.cat));
-      // Teclado (Enter/Espacio)
-      bin.addEventListener("keydown", (e)=>{
-        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); classify(bin.dataset.cat); }
-      });
-    });
+// Estado de juego
+let pool=[], idx=0, score=0, hits=0, streak=0, timer=null, timeLeft=60, finished=false;
+let mistakes=[];
 
-    // Botones
-    document.getElementById("btnRestart").addEventListener("click", restart);
-    document.getElementById("btnSkip").addEventListener("click", ()=>{
-      lives--; updateHUD(); nextItem();
-      if(lives<=0){ endGame(); }
-    });
+// UI refs
+const nameEl = byId("name"), emojiEl = byId("emoji"), toast = byId("toast");
+const scoreEl = byId("score"), hitsEl=byId("hits"), streakEl=byId("streak");
+const timeEl = byId("time"), barEl=byId("bar");
+const startBtn = byId("startBtn"), restartBtn=byId("restartBtn"), skipBtn=byId("skipBtn"), howBtn=byId("howBtn");
+const itemEl = byId("item"); const dropzone = byId("dropzone");
 
-    // Pausa si la pestaña se oculta (no obligatorio, pero mejora UX)
-    document.addEventListener("visibilitychange", ()=>{
-      if(document.hidden){ clearInterval(timer); }
-      else{ startTimer(); }
-    });
+// Preparar bins (clic y DnD)
+document.querySelectorAll(".bin").forEach(bin=>{
+  bin.addEventListener("click", ()=> choose(bin.dataset.cat));
+  bin.addEventListener("dragover", e=>{e.preventDefault(); bin.style.outline="3px dashed #38bdf8"});
+  bin.addEventListener("dragleave", ()=> bin.style.outline="none");
+  bin.addEventListener("drop", e=>{ e.preventDefault(); bin.style.outline="none"; choose(bin.dataset.cat);});
+});
 
-    // Inicio
-    (function init(){
-      pool = pickPool(); nextItem(); updateHUD(); startTimer();
-    })();
-  </script>
+// Teclado rápido 1-4
+window.addEventListener("keydown", e=>{
+  if(finished) return;
+  const map = { "1":"organico", "2":"reciclable", "3":"no_aprovechable", "4":"peligroso" };
+  if(map[e.key]) choose(map[e.key]);
+});
+
+// Arrastrable
+itemEl.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain","item"); });
+
+// Botones
+startBtn.onclick = start;
+restartBtn.onclick = start;
+skipBtn.onclick = ()=>{ if(finished) return; score=Math.max(0,score-2); next("⏭️ Salto: –2 pts"); };
+howBtn.onclick = ()=> showTipForCurrent();
+
+// Iniciar o reiniciar
+function start(){
+  finished=false; mistakes=[];
+  score=hits=streak=0; idx=0; timeLeft=60;
+  scoreEl.textContent=0; hitsEl.textContent=0; streakEl.textContent=0;
+  timeEl.textContent=timeLeft; barEl.style.width="100%";
+  startBtn.style.display="none"; restartBtn.style.display="inline-block";
+  // Construye un pool aleatorio de al menos 50 elementos
+  pool = shuffle([...ITEMS]).slice(0, Math.max(50, Math.min(ITEMS.length, 80)));
+  show(pool[idx]);
+  if(timer) clearInterval(timer);
+  timer = setInterval(()=>{
+    if(--timeLeft<=0){ timeLeft=0; end(); }
+    updateTimeBar();
+  },1000);
+  toast.className = "toast";
+  toast.textContent = "Arrastra o usa 1–4 para clasificar más rápido. ¡Limpio y seco = reciclable!";
+}
+
+// Mostrar ítem
+function show([name, cat, emoji, tip]){
+  nameEl.textContent = name;
+  emojiEl.textContent = emoji || "📦";
+  itemEl.dataset.cat = cat;
+  itemEl.dataset.tip = tip || "";
+}
+
+// Elegir contenedor
+function choose(cat){
+  if(finished) return;
+  const real = itemEl.dataset.cat;
+  const tip  = itemEl.dataset.tip;
+  if(cat===real){
+    hits++; score += 10 + Math.min(20,streak*2); streak++;
+    toast.className="toast ok";
+    toast.innerHTML = `✅ ¡Correcto! <b>${nameEl.textContent}</b> → <b>${pretty(real)}</b>. ${tip}`;
+  }else{
+    score = Math.max(0, score-5); streak=0;
+    mistakes.push({item:nameEl.textContent, correcto:pretty(real), elegido:pretty(cat), tip});
+    toast.className="toast bad";
+    toast.innerHTML = `❌ Ups. <b>${nameEl.textContent}</b> va a <b>${pretty(real)}</b>. ${tip}`;
+  }
+  scoreEl.textContent = score; hitsEl.textContent = hits; streakEl.textContent = streak;
+  next();
+}
+
+// Siguiente ítem
+function next(extraMsg){
+  idx++;
+  if(idx>=pool.length){ end(); return; }
+  show(pool[idx]);
+  if(extraMsg){
+    toast.className="toast";
+    toast.textContent = extraMsg;
+  }
+}
+
+// Barra de tiempo
+function updateTimeBar(){
+  timeEl.textContent = timeLeft;
+  const pct = (timeLeft/60)*100;
+  barEl.style.width = pct + "%";
+  barEl.style.background = timeLeft<10 ? "#ef4444" : (timeLeft<20 ? "#f59e0b" : "#22c55e");
+}
+
+// Explicación puntual
+function showTipForCurrent(){
+  toast.className="toast";
+  toast.innerHTML = `ℹ️ ${nameEl.textContent}: ${itemEl.dataset.tip || "Clasifica pensando en: <i>limpio y seco = reciclable</i>; <i>muy sucio = no aprovechable</i>; <i>químicos/afilados = peligroso</i>."}`;
+}
+
+// Final del juego
+function end(){
+  if(finished) return;
+  finished=true;
+  clearInterval(timer);
+  barEl.style.width="0%";
+  const total = idx; const acc = total? Math.round((hits/total)*100):0;
+  const eco = ecoMission();
+  const game = byId("game");
+  game.innerHTML = `
+    <div class="end card">
+      <h2>⏰ ¡Tiempo! Resultado final</h2>
+      <div class="hud" style="margin:10px 0 6px">
+        <div class="pill">⭐ Puntos: <b>${score}</b></div>
+        <div class="pill">✅ Aciertos: <b>${hits}/${total}</b></div>
+        <div class="pill">🎯 Exactitud: <b>${acc}%</b></div>
+      </div>
+      <div class="grid">
+        <div class="toast">💡 <b>Eco-tip:</b> Limpia, seca y aplasta los envases; el aceite usado va en botella cerrada y a punto de recolección.</div>
+        <div class="toast">🤝 <b>Competencia ciudadana:</b> ¡Tú decides! Separar bien reduce costos del servicio público, dignifica el trabajo de recicladores de oficio y disminuye emisiones de metano en rellenos.</div>
+        <div class="toast">🌱 <b>Misión del día:</b> ${eco}</div>
+        ${ mistakes.length ? `
+        <div class="toast">
+          <b>Repasa tus errores (${mistakes.length}):</b>
+          <ul class="mistakes">
+            ${mistakes.map(m=>`<li>• <b>${m.item}</b>: correcto <b>${m.correcto}</b> (tú pusiste <i>${m.elegido}</i>). <span style="color:#6b7280">${m.tip}</span></li>`).join("")}
+          </ul>
+        </div>` : `<div class="toast ok">🏆 ¡Sin errores! ¡Excelente clasificación!</div>`}
+        <div class="actions"><button class="success" onclick="location.reload()">Jugar de nuevo</button></div>
+        <div class="toast" style="font-size:13px">
+          <b>Guía rápida de colores (Colombia):</b> Verde = orgánico aprovechable; Blanco = reciclables limpios y secos;
+          Negro = no aprovechables; Rojo = peligrosos/posconsumo (pilas, medicamentos, aceites, bombillos, electrónicos).
+        </div>
+      </div>
+    </div>`;
+}
+
+// Frases de misión ciudadana
+function ecoMission(){
+  const ideas = [
+    "Lleva hoy tus pilas usadas al punto rojo más cercano.",
+    "Di no a la bolsa: usa una reutilizable en tu próxima compra.",
+    "Enjuaga y aplasta 5 botellas PET antes de sacarlas al reciclaje.",
+    "Separa tus residuos orgánicos para iniciar una compostera casera.",
+    "Guarda el aceite usado en una botella y entrégalo cuando esté llena.",
+    "Identifica en tu barrio quién recoge reciclaje y acuerda un horario.",
+    "Repara en lugar de botar: intenta arreglar ese electrodoméstico.",
+    "Cambia el cepillo de dientes por uno de bambú la próxima vez.",
+    "Reduce latas y plásticos de un solo uso durante una semana.",
+    "En casa: instala un pequeño contenedor rojo para peligrosos."
+  ];
+  return ideas[rand(0,ideas.length-1)];
+}
+</script>
 </body>
 </html>
