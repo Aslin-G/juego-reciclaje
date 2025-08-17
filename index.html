@@ -6,8 +6,8 @@
   <title>Clasifica & Gana: Reciclaje</title>
   <meta name="description" content="Juego educativo de clasificación de residuos: orgánico, reciclable y no aprovechable." />
   <style>
-    :root{
-      --bg:#ffffff;          /* fondo blanco */
+      :root{
+        --bg:linear-gradient(135deg,#e0f7fa,#fffde7); /* fondo con degradado */
       --text:#111827;        /* texto principal gris oscuro */
       --muted:#6b7280;       /* texto secundario */
       --card:#ffffff;        /* tarjetas claras */
@@ -47,40 +47,41 @@
     .stat{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:14px}
     .wrap{padding:18px}
     .arena{display:grid;grid-template-columns:1fr;gap:18px}
-    .itemCard{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:18px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      min-height:200px;
-      position:relative;
-      text-align:center;
-      box-shadow:var(--shadow);
-      transition:transform .2s ease, background-color .2s ease;
-      user-select:none;
-    }
-    .itemCard.dragging{opacity:.95;transform:scale(1.015)}
+      .itemCard{
+        background:var(--card);
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+        padding:18px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        min-height:200px;
+        position:relative;
+        text-align:center;
+        box-shadow:var(--shadow);
+        transition:transform .2s ease, background-color .2s ease;
+        user-select:none;
+        cursor:grab;
+      }
+      .itemCard.dragging{opacity:.95;transform:scale(1.015);cursor:grabbing}
     .itemEmoji{font-size:68px;line-height:1.1;margin-bottom:8px}
     .itemName{font-size:24px;font-weight:800;margin-bottom:6px}
     .hint{font-size:14px;color:var(--muted)}
     .bins{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .bin{
-      background:#fff;
-      border:2px dashed var(--border);
-      border-radius:16px;
-      padding:16px;
-      text-align:center;
-      transition:transform .12s ease,border-color .12s ease,background .12s ease;
-      min-height:130px;
-      position:relative;
-    }
+      .bin{
+        background:#fff;
+        border:2px dashed var(--border);
+        border-radius:16px;
+        padding:16px;
+        text-align:center;
+        transition:transform .12s ease,border-color .12s ease,background .12s ease,box-shadow .12s ease;
+        min-height:130px;
+        position:relative;
+      }
     .binLabel{font-weight:800;margin-top:6px}
     .binEmoji{font-size:36px}
     .bin[data-cat="Orgánico"]{--binColor:var(--bin-org)}
     .bin[data-cat="Reciclable"]{--binColor:var(--bin-rec)}
     .bin[data-cat="No aprovechable"]{--binColor:var(--bin-noap)}
-    .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:var(--card)}
+      .bin.hover{transform:translateY(-2px);border-color:var(--binColor);background:var(--card);box-shadow:0 0 12px var(--binColor)}
     .feedback{
       position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       pointer-events:none;font-size:28px;font-weight:900;letter-spacing:.2px;
@@ -151,10 +152,11 @@
   <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="Resultados">
     <div class="modalCard">
       <h2>🎉 ¡Fin del juego!</h2>
-      <div class="stars" id="stars">⭐️⭐️⭐️</div>
-      <p id="summary">Puntos: 0 — Aciertos: 0 — Errores: 0</p>
-      <div class="row" style="margin:10px 0 12px">
-        <span class="tag">Orgánico = 🌿</span>
+        <div class="stars" id="stars">⭐️⭐️⭐️</div>
+        <p id="summary">Puntos: 0 — Aciertos: 0 — Errores: 0</p>
+        <p id="ecoTip"></p>
+        <div class="row" style="margin:10px 0 12px">
+          <span class="tag">Orgánico = 🌿</span>
         <span class="tag">Reciclable = ♻️</span>
         <span class="tag">No aprovechable = 🗑️</span>
       </div>
@@ -173,8 +175,6 @@
     const POINTS_OK = 100;
     const POINTS_BAD = -50;
     const LEVEL_SIZE = 10;     // ítems aproximados por nivel
-    const RECORDS_KEY = "records"; // almacenamiento de puntuaciones
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxa1FR9jv1hyoe590Pt3bY760Oghl7Q8BCZ9w-wrmOJw6p7A4aJghdB7tczfiyVDbGEeg/exec";
     // Ítems del juego (editables)
     const ITEMS = [
       {name:"Cáscara de plátano", emoji:"🍌", cat:"Orgánico", tip:"Restos de frutas y verduras son compostables."},
@@ -191,7 +191,21 @@
       {name:"Cáscara de huevo", emoji:"🥚", cat:"Orgánico", tip:"Se puede compostar (mejor triturada)."},
       {name:"Revista", emoji:"📚", cat:"Reciclable", tip:"Si está seca y limpia, se recicla."},
       {name:"Caja de cartón", emoji:"📦", cat:"Reciclable", tip:"Dobla y mantén seca para reciclar."},
-      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."}
+      {name:"Restos de comida", emoji:"🍽️", cat:"Orgánico", tip:"Van al contenedor orgánico/compost."},
+      {name:"Cáscara de naranja", emoji:"🍊", cat:"Orgánico", tip:"Las cáscaras de cítricos también se compostan."},
+      {name:"Té usado", emoji:"🍵", cat:"Orgánico", tip:"Los posos de té enriquecen el compost."},
+      {name:"Restos de poda", emoji:"🌱", cat:"Orgánico", tip:"Hojas y ramas pequeñas son compostables."},
+      {name:"Botella de detergente", emoji:"🧴", cat:"Reciclable", tip:"Lava los envases plásticos antes de reciclar."},
+      {name:"Periódico", emoji:"📰", cat:"Reciclable", tip:"El papel periódico seco se recicla fácilmente."},
+      {name:"Caja de leche Tetra Pak", emoji:"🥛", cat:"Reciclable", tip:"Enjuaga y compacta antes de reciclar."},
+      {name:"Chicle", emoji:"🍬", cat:"No aprovechable", tip:"El chicle usado va al no aprovechable."},
+      {name:"Plato desechable sucio", emoji:"🍽️", cat:"No aprovechable", tip:"Los desechables con comida van a no aprovechable."},
+      {name:"Cepillo de dientes", emoji:"🪥", cat:"No aprovechable", tip:"Plásticos mezclados que no se reciclan."}
+    ];
+    const ECO_TIPS = [
+      "Usa una botella reutilizable para reducir plásticos.",
+      "Separa los residuos orgánicos para hacer compost.",
+      "Apaga las luces que no uses para ahorrar energía."
     ];
 
     // =========================
@@ -256,26 +270,8 @@
         p.textContent = "• " + txt;
         box.appendChild(p);
       });
+      $("#ecoTip").textContent = ECO_TIPS[Math.floor(Math.random()*ECO_TIPS.length)];
       $("#modal").classList.add("show");
-      setTimeout(()=>{
-        const nombreCompleto = prompt("Ingresa tu nombre completo:");
-        if(nombreCompleto){
-          const records = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-          records.push({ nombre: nombreCompleto, puntos: score });
-          localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-          fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nombre: nombreCompleto,
-              puntos: score,
-              ok: stats.ok,
-              bad: stats.bad,
-              explicaciones: stats.explanations
-            })
-          }).catch(err=>console.error('Error enviando datos', err));
-        }
-      },100);
     }
     function startTimer(){
       clearInterval(timer);
